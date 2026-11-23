@@ -21,35 +21,48 @@
     color:#f8eee2;background:rgba(20,25,22,.68);backdrop-filter:blur(12px);
     font:500 14px system-ui,sans-serif;cursor:pointer;transition:background .2s,transform .2s}
   .write-open:hover{background:rgba(72,47,51,.88);transform:translateY(-1px)}
-  .write-open:focus-visible,.letter-dialog button:focus-visible,.letter-dialog textarea:focus-visible,
-  .letter-dialog input:focus-visible{outline:2px solid #ffd1dc;outline-offset:3px}
+  .write-open:focus-visible,.letter-dialog button:focus-visible,
+  .letter-dialog textarea:focus-visible,.letter-dialog input:focus-visible{
+    outline:2px solid #ffd1dc;outline-offset:3px
+  }
   .letter-dialog{width:min(440px,calc(100vw - 32px));max-height:min(82svh,680px);overflow:auto;
     padding:0;border:1px solid rgba(255,255,255,.48);border-radius:22px;color:#45372f;
     background:#fff9ef;box-shadow:0 24px 80px #0009}
   .letter-dialog::backdrop{background:rgba(5,9,7,.68);backdrop-filter:blur(7px)}
-  .letter-inner{padding:clamp(22px,6vw,34px);background:radial-gradient(ellipse at 100% 0,#ffe7e8 0,transparent 48%),#fff9ef}
+  .letter-inner{padding:clamp(22px,6vw,34px);
+    background:radial-gradient(ellipse at 100% 0,#ffe7e8 0,transparent 48%),#fff9ef}
   .letter-inner h1{margin:0 0 8px;font:italic 30px Georgia,serif;color:#8f3e51}
   .letter-hint{margin:0 0 22px;color:#80756d;font:14px/1.5 system-ui,sans-serif}
   .letter-dialog label{display:block;margin:16px 0 7px;font:600 13px system-ui,sans-serif;color:#66574d}
-  .letter-dialog input,.letter-dialog textarea{box-sizing:border-box;width:100%;border:1px solid #e4d5c7;
-    border-radius:12px;padding:12px 13px;background:#fffefa;color:#332a25;font:16px/1.5 system-ui,sans-serif}
+  .letter-dialog input,.letter-dialog textarea{box-sizing:border-box;width:100%;
+    border:1px solid #e4d5c7;border-radius:12px;padding:12px 13px;
+    background:#fffefa;color:#332a25;font:16px/1.5 system-ui,sans-serif}
   .letter-dialog textarea{min-height:150px;resize:vertical}
   .letter-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
   .save-status{min-height:20px;margin:12px 0 0;color:#80756d;font:12px/1.5 system-ui,sans-serif}
   .letter-dialog button.action:disabled{opacity:.6;cursor:wait}
-  .letter-dialog button.action{border:0;border-radius:999px;padding:11px 17px;background:#a8445b;
-    color:white;font:600 14px system-ui,sans-serif;cursor:pointer}
+  .letter-dialog button.action{border:0;border-radius:999px;padding:11px 17px;
+    background:#a8445b;color:white;font:600 14px system-ui,sans-serif;cursor:pointer}
   .letter-dialog button.secondary{border:1px solid #e0cfc0;border-radius:999px;padding:10px 16px;
     background:transparent;color:#66574d;font:500 14px system-ui,sans-serif;cursor:pointer}
-  .letter-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:20px 0 6px;font:italic 18px/1.7 Georgia,serif;color:#514139}
+  .letter-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:20px 0 6px;
+    font:italic 18px/1.7 Georgia,serif;color:#514139}
   .letter-to{font:600 15px system-ui,sans-serif;color:#8f3e51}
-  @media(max-width:480px){.write-open{top:max(12px,env(safe-area-inset-top));right:12px}.cap{bottom:max(5vh,env(safe-area-inset-bottom))}}
+  @media(max-width:480px){
+    .write-open{top:max(12px,env(safe-area-inset-top));right:12px}
+    .cap{bottom:max(5vh,env(safe-area-inset-bottom))}
+  }
   @media(prefers-reduced-motion:reduce){.cap,.write-open{transition:none}}
 </style>
 </head>
 <body>
 <canvas id="c" aria-hidden="true"></canvas>
-<button class="cap" id="replay" type="button" aria-label="Показать букет заново"><span id="greetingTitle">С днём рождения!</span><small id="greetingSubtitle">нажмите, чтобы показать ещё раз</small></button>
+
+<button class="cap" id="replay" type="button" aria-label="Показать букет заново">
+  <span id="greetingTitle">С днём рождения!</span>
+  <small id="greetingSubtitle">нажмите, чтобы показать ещё раз</small>
+</button>
+
 <button class="write-open" id="writeOpen" type="button">✉ Написать письмо</button>
 
 <dialog class="letter-dialog" id="letterDialog" aria-labelledby="letterTitle">
@@ -59,18 +72,23 @@
       <p class="letter-hint">Напиши поздравление — оно появится на красивой открытке рядом с букетом.</p>
 
       <label for="greetingTitleInput">Заголовок на странице</label>
-      <input id="greetingTitleInput" maxlength="70" value="С днём рождения!" placeholder="Например, С юбилеем!">
+      <input id="greetingTitleInput" maxlength="70" value="С днём рождения!"
+        placeholder="Например, С юбилеем!">
 
       <label for="greetingSubtitleInput">Подпись под заголовком</label>
-      <input id="greetingSubtitleInput" maxlength="100" value="нажмите, чтобы показать ещё раз" placeholder="Короткое пожелание">
+      <input id="greetingSubtitleInput" maxlength="100"
+        value="нажмите, чтобы показать ещё раз" placeholder="Короткое пожелание">
 
       <label for="letterToInput">Кому (необязательно)</label>
       <input id="letterToInput" name="to" maxlength="60" placeholder="Например, любимой маме">
 
       <label for="letterMessageInput">Твоё письмо</label>
-      <textarea id="letterMessageInput" name="message" maxlength="1200" required placeholder="Пусть этот день будет наполнен радостью…"></textarea>
+      <textarea id="letterMessageInput" name="message" maxlength="1200" required
+        placeholder="Пусть этот день будет наполнен радостью…"></textarea>
 
-      <p class="save-status" id="saveStatus" aria-live="polite">Черновик сохраняется в этом браузере.</p>
+      <p class="save-status" id="saveStatus" aria-live="polite">
+        Черновик сохраняется в этом браузере.
+      </p>
       <div class="letter-actions">
         <button class="secondary" id="cancelLetter" type="button">Закрыть</button>
         <button class="action" type="submit">Показать письмо</button>
@@ -482,6 +500,16 @@ async function downloadPostcard(){
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+function downloadLetterText(text){
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'pismo.txt';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 async function sharePostcard(){
   const status = document.getElementById('shareStatus');
   const button = document.getElementById('shareCard');
@@ -491,16 +519,20 @@ async function sharePostcard(){
   try{
     const blob = await makePostcard();
     const file = new File([blob], 'otkrytka.png', {type:'image/png'});
+    const title = document.getElementById('greetingTitle').textContent.trim();
+    const subtitle = document.getElementById('greetingSubtitle').textContent.trim();
+    const recipient = document.getElementById('letterTo').textContent.trim();
+    const message = document.getElementById('letterText').textContent.trim();
+    const shareText = [title, subtitle, recipient && `Для ${recipient}:`, message]
+      .filter(Boolean).join('\n\n');
 
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({
-        title: document.getElementById('greetingTitle').textContent,
-        files: [file]
-      });
-      status.textContent = 'Выбери приложение и получателя в меню отправки.';
+      await navigator.share({title, text:shareText, files:[file]});
+      status.textContent = 'Открытка и текст письма переданы в выбранное приложение.';
     }else{
       await downloadPostcard();
-      status.textContent = 'Открытка скачана. Прикрепи otkrytka.png в чате или письме.';
+      downloadLetterText(shareText);
+      status.textContent = 'Скачаны открытка PNG и текст письма TXT. Прикрепи оба файла в сообщении.';
     }
   }catch(error){
     if(error.name !== 'AbortError'){
@@ -550,13 +582,14 @@ letterForm.addEventListener('submit', event => {
   const greetingSubtitle = document.getElementById('greetingSubtitleInput').value.trim();
   saveDraft();
 
-  document.getElementById('greetingTitle').textContent = greetingTitle || 'С днём рождения!';
+  document.getElementById('greetingTitle').textContent =
+    greetingTitle || 'С днём рождения!';
   document.getElementById('greetingSubtitle').textContent =
     greetingSubtitle || 'нажмите, чтобы показать ещё раз';
-
   document.getElementById('letterTo').textContent =
     document.getElementById('letterToInput').value.trim();
-  document.getElementById('letterText').textContent = letterMessageInput.value.trim();
+  document.getElementById('letterText').textContent =
+    letterMessageInput.value.trim();
 
   letterForm.hidden = true;
   letterPreview.hidden = false;
