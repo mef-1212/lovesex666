@@ -16,57 +16,40 @@
     opacity:0;transition:opacity 1.6s ease 3.6s;pointer-events:auto}
   .cap small{display:block;margin-top:8px;font:14px system-ui,sans-serif;color:#8a9a90;font-style:normal}
   body.on .cap{opacity:1}
-
   .write-open{position:fixed;z-index:2;top:max(18px,env(safe-area-inset-top));right:18px;
     border:1px solid rgba(255,240,225,.28);border-radius:999px;padding:11px 16px;
     color:#f8eee2;background:rgba(20,25,22,.68);backdrop-filter:blur(12px);
     font:500 14px system-ui,sans-serif;cursor:pointer;transition:background .2s,transform .2s}
   .write-open:hover{background:rgba(72,47,51,.88);transform:translateY(-1px)}
-  .write-open:focus-visible,.letter-dialog button:focus-visible,
-  .letter-dialog textarea:focus-visible,.letter-dialog input:focus-visible{
-    outline:2px solid #ffd1dc;outline-offset:3px
-  }
-
+  .write-open:focus-visible,.letter-dialog button:focus-visible,.letter-dialog textarea:focus-visible,
+  .letter-dialog input:focus-visible{outline:2px solid #ffd1dc;outline-offset:3px}
   .letter-dialog{width:min(440px,calc(100vw - 32px));max-height:min(82svh,680px);overflow:auto;
     padding:0;border:1px solid rgba(255,255,255,.48);border-radius:22px;color:#45372f;
     background:#fff9ef;box-shadow:0 24px 80px #0009}
   .letter-dialog::backdrop{background:rgba(5,9,7,.68);backdrop-filter:blur(7px)}
-  .letter-inner{padding:clamp(22px,6vw,34px);
-    background:radial-gradient(ellipse at 100% 0,#ffe7e8 0,transparent 48%),#fff9ef}
+  .letter-inner{padding:clamp(22px,6vw,34px);background:radial-gradient(ellipse at 100% 0,#ffe7e8 0,transparent 48%),#fff9ef}
   .letter-inner h1{margin:0 0 8px;font:italic 30px Georgia,serif;color:#8f3e51}
   .letter-hint{margin:0 0 22px;color:#80756d;font:14px/1.5 system-ui,sans-serif}
-  .letter-dialog label{display:block;margin:16px 0 7px;
-    font:600 13px system-ui,sans-serif;color:#66574d}
-  .letter-dialog input,.letter-dialog textarea{box-sizing:border-box;width:100%;
-    border:1px solid #e4d5c7;border-radius:12px;padding:12px 13px;
-    background:#fffefa;color:#332a25;font:16px/1.5 system-ui,sans-serif}
+  .letter-dialog label{display:block;margin:16px 0 7px;font:600 13px system-ui,sans-serif;color:#66574d}
+  .letter-dialog input,.letter-dialog textarea{box-sizing:border-box;width:100%;border:1px solid #e4d5c7;
+    border-radius:12px;padding:12px 13px;background:#fffefa;color:#332a25;font:16px/1.5 system-ui,sans-serif}
   .letter-dialog textarea{min-height:150px;resize:vertical}
   .letter-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-  .letter-dialog button.action{border:0;border-radius:999px;padding:11px 17px;
-    background:#a8445b;color:white;font:600 14px system-ui,sans-serif;cursor:pointer}
+  .save-status{min-height:20px;margin:12px 0 0;color:#80756d;font:12px/1.5 system-ui,sans-serif}
+  .letter-dialog button.action:disabled{opacity:.6;cursor:wait}
+  .letter-dialog button.action{border:0;border-radius:999px;padding:11px 17px;background:#a8445b;
+    color:white;font:600 14px system-ui,sans-serif;cursor:pointer}
   .letter-dialog button.secondary{border:1px solid #e0cfc0;border-radius:999px;padding:10px 16px;
     background:transparent;color:#66574d;font:500 14px system-ui,sans-serif;cursor:pointer}
-  .letter-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:20px 0 6px;
-    font:italic 18px/1.7 Georgia,serif;color:#514139}
+  .letter-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:20px 0 6px;font:italic 18px/1.7 Georgia,serif;color:#514139}
   .letter-to{font:600 15px system-ui,sans-serif;color:#8f3e51}
-
-  @media(max-width:480px){
-    .write-open{top:max(12px,env(safe-area-inset-top));right:12px}
-    .cap{bottom:max(5vh,env(safe-area-inset-bottom))}
-  }
-  @media(prefers-reduced-motion:reduce){
-    .cap,.write-open{transition:none}
-  }
+  @media(max-width:480px){.write-open{top:max(12px,env(safe-area-inset-top));right:12px}.cap{bottom:max(5vh,env(safe-area-inset-bottom))}}
+  @media(prefers-reduced-motion:reduce){.cap,.write-open{transition:none}}
 </style>
 </head>
 <body>
 <canvas id="c" aria-hidden="true"></canvas>
-
-<button class="cap" id="replay" type="button" aria-label="Показать букет заново">
-  <span id="greetingTitle">С днём рождения!</span>
-  <small id="greetingSubtitle">нажмите, чтобы показать ещё раз</small>
-</button>
-
+<button class="cap" id="replay" type="button" aria-label="Показать букет заново"><span id="greetingTitle">С днём рождения!</span><small id="greetingSubtitle">нажмите, чтобы показать ещё раз</small></button>
 <button class="write-open" id="writeOpen" type="button">✉ Написать письмо</button>
 
 <dialog class="letter-dialog" id="letterDialog" aria-labelledby="letterTitle">
@@ -76,21 +59,18 @@
       <p class="letter-hint">Напиши поздравление — оно появится на красивой открытке рядом с букетом.</p>
 
       <label for="greetingTitleInput">Заголовок на странице</label>
-      <input id="greetingTitleInput" maxlength="70"
-        value="С днём рождения!" placeholder="Например, С юбилеем!">
+      <input id="greetingTitleInput" maxlength="70" value="С днём рождения!" placeholder="Например, С юбилеем!">
 
       <label for="greetingSubtitleInput">Подпись под заголовком</label>
-      <input id="greetingSubtitleInput" maxlength="100"
-        value="нажмите, чтобы показать ещё раз" placeholder="Короткое пожелание">
+      <input id="greetingSubtitleInput" maxlength="100" value="нажмите, чтобы показать ещё раз" placeholder="Короткое пожелание">
 
       <label for="letterToInput">Кому (необязательно)</label>
-      <input id="letterToInput" name="to" maxlength="60"
-        placeholder="Например, любимой маме">
+      <input id="letterToInput" name="to" maxlength="60" placeholder="Например, любимой маме">
 
       <label for="letterMessageInput">Твоё письмо</label>
-      <textarea id="letterMessageInput" name="message" maxlength="1200" required
-        placeholder="Пусть этот день будет наполнен радостью…"></textarea>
+      <textarea id="letterMessageInput" name="message" maxlength="1200" required placeholder="Пусть этот день будет наполнен радостью…"></textarea>
 
+      <p class="save-status" id="saveStatus" aria-live="polite">Черновик сохраняется в этом браузере.</p>
       <div class="letter-actions">
         <button class="secondary" id="cancelLetter" type="button">Закрыть</button>
         <button class="action" type="submit">Показать письмо</button>
@@ -103,6 +83,11 @@
       <p class="letter-text" id="letterText"></p>
       <div class="letter-actions">
         <button class="secondary" id="editLetter" type="button">Изменить</button>
+        <button class="secondary" id="saveCard" type="button">Скачать PNG</button>
+        <button class="action" id="shareCard" type="button">Отправить</button>
+      </div>
+      <p class="save-status" id="shareStatus" aria-live="polite"></p>
+      <div class="letter-actions">
         <button class="action" id="closeLetter" type="button">Готово</button>
       </div>
     </section>
@@ -308,6 +293,7 @@ function drawWrap(t){
   ctx.quadraticCurveTo(b.x - bw, ry - u * 0.7, b.x - bw * 1.1, ry + u * 0.2);
   ctx.quadraticCurveTo(b.x - bw, ry + u * 0.7, b.x, ry + u * 0.15);
   ctx.fill();
+
   ctx.beginPath();
   ctx.moveTo(b.x, ry + u * 0.15);
   ctx.quadraticCurveTo(b.x + bw, ry - u * 0.7, b.x + bw * 1.1, ry + u * 0.2);
@@ -355,6 +341,178 @@ const letterDialog = document.getElementById('letterDialog');
 const letterForm = document.getElementById('letterForm');
 const letterPreview = document.getElementById('letterPreview');
 const letterMessageInput = document.getElementById('letterMessageInput');
+const saveStatus = document.getElementById('saveStatus');
+const draftKey = 'bouquet-letter-draft-v1';
+
+function readDraft(){
+  try{
+    const draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+    if(!draft) return;
+    document.getElementById('greetingTitleInput').value = draft.title || 'С днём рождения!';
+    document.getElementById('greetingSubtitleInput').value = draft.subtitle || '';
+    document.getElementById('letterToInput').value = draft.to || '';
+    letterMessageInput.value = draft.message || '';
+    document.getElementById('greetingTitle').textContent = draft.title || 'С днём рождения!';
+    document.getElementById('greetingSubtitle').textContent = draft.subtitle || '';
+  }catch(error){
+    saveStatus.textContent = 'Не удалось прочитать черновик.';
+  }
+}
+
+function saveDraft(){
+  const draft = {
+    title: document.getElementById('greetingTitleInput').value.trim(),
+    subtitle: document.getElementById('greetingSubtitleInput').value.trim(),
+    to: document.getElementById('letterToInput').value.trim(),
+    message: letterMessageInput.value
+  };
+
+  try{
+    localStorage.setItem(draftKey, JSON.stringify(draft));
+    saveStatus.textContent = 'Черновик сохранён в этом браузере.';
+  }catch(error){
+    saveStatus.textContent = 'Браузер не смог сохранить черновик.';
+  }
+  return draft;
+}
+
+function wrapText(context, text, maxWidth){
+  const lines = [];
+  for(const paragraph of text.split(/\r?\n/)){
+    if(!paragraph.trim()){
+      lines.push('');
+      continue;
+    }
+
+    let line = '';
+    for(const word of paragraph.split(/\s+/)){
+      const candidate = line ? line + ' ' + word : word;
+      if(line && context.measureText(candidate).width > maxWidth){
+        lines.push(line);
+        line = word;
+      }else{
+        line = candidate;
+      }
+    }
+    if(line) lines.push(line);
+  }
+  return lines;
+}
+
+function makePostcard(){
+  return new Promise((resolve, reject) => {
+    const out = document.createElement('canvas');
+    const outCtx = out.getContext('2d');
+    const width = 1200;
+    const bouquetHeight = 1000;
+    const lineHeight = 46;
+
+    const title = document.getElementById('greetingTitle').textContent.trim();
+    const subtitle = document.getElementById('greetingSubtitle').textContent.trim();
+    const recipient = document.getElementById('letterTo').textContent.trim();
+    const message = document.getElementById('letterText').textContent.trim();
+
+    const measure = document.createElement('canvas').getContext('2d');
+    measure.font = '34px Georgia, serif';
+    const lines = wrapText(measure, message, 1000);
+    const cardTop = bouquetHeight - 18;
+    const cardHeight = 230 + (recipient ? 48 : 0) + lines.length * lineHeight;
+
+    out.width = width;
+    out.height = cardTop + cardHeight + 60;
+
+    const bg = outCtx.createLinearGradient(0, 0, 0, out.height);
+    bg.addColorStop(0, '#17221c');
+    bg.addColorStop(1, '#080b0a');
+    outCtx.fillStyle = bg;
+    outCtx.fillRect(0, 0, out.width, out.height);
+
+    const scale = Math.min((width - 48) / cv.width, (bouquetHeight - 36) / cv.height);
+    const drawW = cv.width * scale;
+    const drawH = cv.height * scale;
+    outCtx.drawImage(cv, (width - drawW) / 2, 18 + (bouquetHeight - 36 - drawH) / 2, drawW, drawH);
+
+    outCtx.fillStyle = '#fff8ed';
+    outCtx.beginPath();
+    outCtx.roundRect(36, cardTop, width - 72, cardHeight, 28);
+    outCtx.fill();
+
+    outCtx.textAlign = 'center';
+    outCtx.fillStyle = '#8f3e51';
+    outCtx.font = 'italic 48px Georgia, serif';
+    outCtx.fillText(title || 'С днём рождения!', width / 2, cardTop + 76, width - 140);
+
+    let y = cardTop + 120;
+    if(subtitle){
+      outCtx.fillStyle = '#80756d';
+      outCtx.font = '22px system-ui, sans-serif';
+      outCtx.fillText(subtitle, width / 2, y, width - 140);
+      y += 42;
+    }
+
+    if(recipient){
+      outCtx.fillStyle = '#8f3e51';
+      outCtx.font = 'bold 24px system-ui, sans-serif';
+      outCtx.fillText(recipient, width / 2, y, width - 140);
+      y += 42;
+    }
+
+    outCtx.textAlign = 'left';
+    outCtx.fillStyle = '#514139';
+    outCtx.font = '34px Georgia, serif';
+    for(const line of lines){
+      y += lineHeight;
+      outCtx.fillText(line, 100, y, width - 200);
+    }
+
+    out.toBlob(
+      blob => blob ? resolve(blob) : reject(new Error('Не удалось создать PNG.')),
+      'image/png'
+    );
+  });
+}
+
+async function downloadPostcard(){
+  const blob = await makePostcard();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'otkrytka.png';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function sharePostcard(){
+  const status = document.getElementById('shareStatus');
+  const button = document.getElementById('shareCard');
+  button.disabled = true;
+  status.textContent = 'Готовлю открытку…';
+
+  try{
+    const blob = await makePostcard();
+    const file = new File([blob], 'otkrytka.png', {type:'image/png'});
+
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({
+        title: document.getElementById('greetingTitle').textContent,
+        files: [file]
+      });
+      status.textContent = 'Выбери приложение и получателя в меню отправки.';
+    }else{
+      await downloadPostcard();
+      status.textContent = 'Открытка скачана. Прикрепи otkrytka.png в чате или письме.';
+    }
+  }catch(error){
+    if(error.name !== 'AbortError'){
+      status.textContent = 'Не получилось подготовить PNG. Попробуй скачать открытку.';
+    }
+  }finally{
+    button.disabled = false;
+  }
+}
+
+readDraft();
+letterForm.addEventListener('input', saveDraft);
 
 document.getElementById('writeOpen').addEventListener('click', () => {
   letterForm.hidden = false;
@@ -366,6 +524,18 @@ document.getElementById('writeOpen').addEventListener('click', () => {
 document.getElementById('cancelLetter').addEventListener('click', () => letterDialog.close());
 document.getElementById('closeLetter').addEventListener('click', () => letterDialog.close());
 
+document.getElementById('saveCard').addEventListener('click', async () => {
+  const status = document.getElementById('shareStatus');
+  try{
+    await downloadPostcard();
+    status.textContent = 'Открытка скачана как otkrytka.png.';
+  }catch(error){
+    status.textContent = 'Не удалось сохранить открытку.';
+  }
+});
+
+document.getElementById('shareCard').addEventListener('click', sharePostcard);
+
 document.getElementById('editLetter').addEventListener('click', () => {
   letterPreview.hidden = true;
   letterForm.hidden = false;
@@ -376,12 +546,13 @@ letterForm.addEventListener('submit', event => {
   event.preventDefault();
   if(!letterForm.reportValidity()) return;
 
-  const title = document.getElementById('greetingTitleInput').value.trim();
-  const subtitle = document.getElementById('greetingSubtitleInput').value.trim();
+  const greetingTitle = document.getElementById('greetingTitleInput').value.trim();
+  const greetingSubtitle = document.getElementById('greetingSubtitleInput').value.trim();
+  saveDraft();
 
-  document.getElementById('greetingTitle').textContent = title || 'С днём рождения!';
+  document.getElementById('greetingTitle').textContent = greetingTitle || 'С днём рождения!';
   document.getElementById('greetingSubtitle').textContent =
-    subtitle || 'нажмите, чтобы показать ещё раз';
+    greetingSubtitle || 'нажмите, чтобы показать ещё раз';
 
   document.getElementById('letterTo').textContent =
     document.getElementById('letterToInput').value.trim();
@@ -389,7 +560,6 @@ letterForm.addEventListener('submit', event => {
 
   letterForm.hidden = true;
   letterPreview.hidden = false;
-  document.getElementById('letterTitle').textContent = 'Тёплые слова';
 });
 
 addEventListener('resize', () => {
