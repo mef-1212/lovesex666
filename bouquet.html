@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Маленький подарок</title>
+<style>
+  html,body{margin:0;min-height:100%;background:#080b0a;overflow:hidden}
+  body{height:100svh;min-height:420px}
+  canvas{position:fixed;inset:0}
+  .cap{appearance:none;border:0;background:transparent;width:100%;cursor:pointer}
+  .cap:focus-visible{outline:2px solid #f3e9dc;outline-offset:6px;border-radius:8px}
+  canvas{display:block;width:100%;height:100%}
+  .cap{position:fixed;left:0;right:0;bottom:6vh;text-align:center;color:#f3e9dc;
+    font:italic 400 clamp(20px,4vw,34px)/1.3 Georgia,"Times New Roman",serif;
+    opacity:0;transition:opacity 1.6s ease 3.6s;pointer-events:auto}
+  .cap small{display:block;margin-top:8px;font:14px system-ui,sans-serif;color:#8a9a90;font-style:normal}
+  body.on .cap{opacity:1}
+
+  .write-open{position:fixed;z-index:2;top:max(18px,env(safe-area-inset-top));right:18px;
+    border:1px solid rgba(255,240,225,.28);border-radius:999px;padding:11px 16px;
+    color:#f8eee2;background:rgba(20,25,22,.68);backdrop-filter:blur(12px);
+    font:500 14px system-ui,sans-serif;cursor:pointer;transition:background .2s,transform .2s}
+  .write-open:hover{background:rgba(72,47,51,.88);transform:translateY(-1px)}
+  .write-open:focus-visible,.letter-dialog button:focus-visible,
+  .letter-dialog textarea:focus-visible,.letter-dialog input:focus-visible{
+    outline:2px solid #ffd1dc;outline-offset:3px
+  }
+
+  .letter-dialog{width:min(440px,calc(100vw - 32px));max-height:min(82svh,680px);overflow:auto;
+    padding:0;border:1px solid rgba(255,255,255,.48);border-radius:22px;color:#45372f;
+    background:#fff9ef;box-shadow:0 24px 80px #0009}
+  .letter-dialog::backdrop{background:rgba(5,9,7,.68);backdrop-filter:blur(7px)}
+  .letter-inner{padding:clamp(22px,6vw,34px);
+    background:radial-gradient(ellipse at 100% 0,#ffe7e8 0,transparent 48%),#fff9ef}
+  .letter-inner h1{margin:0 0 8px;font:italic 30px Georgia,serif;color:#8f3e51}
+  .letter-hint{margin:0 0 22px;color:#80756d;font:14px/1.5 system-ui,sans-serif}
+  .letter-dialog label{display:block;margin:16px 0 7px;
+    font:600 13px system-ui,sans-serif;color:#66574d}
+  .letter-dialog input,.letter-dialog textarea{box-sizing:border-box;width:100%;
+    border:1px solid #e4d5c7;border-radius:12px;padding:12px 13px;
+    background:#fffefa;color:#332a25;font:16px/1.5 system-ui,sans-serif}
+  .letter-dialog textarea{min-height:150px;resize:vertical}
+  .letter-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+  .letter-dialog button.action{border:0;border-radius:999px;padding:11px 17px;
+    background:#a8445b;color:white;font:600 14px system-ui,sans-serif;cursor:pointer}
+  .letter-dialog button.secondary{border:1px solid #e0cfc0;border-radius:999px;padding:10px 16px;
+    background:transparent;color:#66574d;font:500 14px system-ui,sans-serif;cursor:pointer}
+  .letter-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:20px 0 6px;
+    font:italic 18px/1.7 Georgia,serif;color:#514139}
+  .letter-to{font:600 15px system-ui,sans-serif;color:#8f3e51}
+
+  @media(max-width:480px){
+    .write-open{top:max(12px,env(safe-area-inset-top));right:12px}
+    .cap{bottom:max(5vh,env(safe-area-inset-bottom))}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .cap,.write-open{transition:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+
+<button class="cap" id="replay" type="button" aria-label="Показать букет заново">
+  <span id="greetingTitle">С днём рождения!</span>
+  <small id="greetingSubtitle">нажмите, чтобы показать ещё раз</small>
+</button>
+
+<button class="write-open" id="writeOpen" type="button">✉ Написать письмо</button>
+
+<dialog class="letter-dialog" id="letterDialog" aria-labelledby="letterTitle">
+  <div class="letter-inner">
+    <form id="letterForm">
+      <h1 id="letterTitle">Тёплые слова</h1>
+      <p class="letter-hint">Напиши поздравление — оно появится на красивой открытке рядом с букетом.</p>
+
+      <label for="greetingTitleInput">Заголовок на странице</label>
+      <input id="greetingTitleInput" maxlength="70"
+        value="С днём рождения!" placeholder="Например, С юбилеем!">
+
+      <label for="greetingSubtitleInput">Подпись под заголовком</label>
+      <input id="greetingSubtitleInput" maxlength="100"
+        value="нажмите, чтобы показать ещё раз" placeholder="Короткое пожелание">
+
+      <label for="letterToInput">Кому (необязательно)</label>
+      <input id="letterToInput" name="to" maxlength="60"
+        placeholder="Например, любимой маме">
+
+      <label for="letterMessageInput">Твоё письмо</label>
+      <textarea id="letterMessageInput" name="message" maxlength="1200" required
+        placeholder="Пусть этот день будет наполнен радостью…"></textarea>
+
+      <div class="letter-actions">
+        <button class="secondary" id="cancelLetter" type="button">Закрыть</button>
+        <button class="action" type="submit">Показать письмо</button>
+      </div>
+    </form>
+
+    <section id="letterPreview" hidden>
+      <h1>Для тебя</h1>
+      <p class="letter-to" id="letterTo"></p>
+      <p class="letter-text" id="letterText"></p>
+      <div class="letter-actions">
+        <button class="secondary" id="editLetter" type="button">Изменить</button>
+        <button class="action" id="closeLetter" type="button">Готово</button>
+      </div>
+    </section>
+  </div>
+</dialog>
+
+<script>
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W, H, dpr, flowers = [], start = 0;
+
+const PALETTE = [
+  ['#ff6b8b','#ffd1dc'], ['#ffb347','#fff0c2'], ['#c77dff','#ead7ff'],
+  ['#ff4d6d','#ffc2cf'], ['#ffe066','#fff7c9'], ['#7bdff2','#d9f6fb']
+];
+
+function rand(seed){
+  let s = seed;
+  return () => (s = (s * 16807) % 2147483647) / 2147483647;
+}
+
+function build(){
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  W = cv.clientWidth;
+  H = cv.clientHeight;
+  cv.width = W * dpr;
+  cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const u = Math.min(W, H * 0.8) / 10;
+  const r = rand(42);
+  const base = {x: W / 2, y: H * 0.8};
+  flowers = [];
+  const n = 13;
+
+  for(let i = 0; i < n; i++){
+    const a = (i / (n - 1) - 0.5) * 1.5 + (r() - 0.5) * 0.12;
+    const len = u * (3.2 + r() * 1.8) * (1 - Math.abs(a) * 0.25);
+    const tx = base.x + Math.sin(a) * len * 1.15;
+    const ty = base.y - Math.cos(a) * len * 1.05 - u * 1.2;
+    const [c1, c2] = PALETTE[i % PALETTE.length];
+
+    flowers.push({
+      bx: base.x + (r() - 0.5) * u * 0.4,
+      by: base.y,
+      tx, ty,
+      cx: base.x + Math.sin(a) * len * 0.35,
+      cy: base.y - len * 0.55,
+      size: u * (0.55 + r() * 0.3),
+      petals: 6 + Math.floor(r() * 4),
+      c1, c2,
+      rot: r() * 6.28,
+      delay: 0.25 + i * 0.13,
+      phase: r() * 6.28,
+      leaf: r() > 0.35
+    });
+  }
+
+  flowers.sort((a, b) => a.ty - b.ty);
+  flowers.u = u;
+  flowers.base = base;
+}
+
+const ease = t => t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3);
+const back = t => {
+  t = Math.max(0, Math.min(1, t));
+  const c = 1.7;
+  return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
+};
+
+function stemPoint(f, t, sway){
+  const x = (1-t)*(1-t)*f.bx + 2*(1-t)*t*f.cx + t*t*f.tx;
+  const y = (1-t)*(1-t)*f.by + 2*(1-t)*t*f.cy + t*t*f.ty;
+  return [x + sway * t * t, y];
+}
+
+function drawFlower(f, bloom, sway, time){
+  const [x, y] = stemPoint(f, 1, sway);
+  const s = f.size * bloom;
+  if(s <= 0.5) return;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(f.rot + Math.sin(time * 0.8 + f.phase) * 0.05);
+
+  for(let layer = 0; layer < 2; layer++){
+    const k = layer ? 0.62 : 1;
+    const off = layer ? Math.PI / f.petals : 0;
+
+    for(let p = 0; p < f.petals; p++){
+      ctx.save();
+      ctx.rotate(p * 2 * Math.PI / f.petals + off);
+      const g = ctx.createLinearGradient(0, 0, 0, -s * k * 1.5);
+      g.addColorStop(0, f.c1);
+      g.addColorStop(1, layer ? f.c1 : f.c2);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(0, -s * k * 0.78, s * k * 0.42, s * k * 0.78, 0, 0, 7);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  ctx.fillStyle = '#ffd86b';
+  ctx.beginPath();
+  ctx.arc(0, 0, s * 0.26, 0, 7);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(120,70,0,.35)';
+  for(let i = 0; i < 6; i++){
+    const a = i * 1.05;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * s * 0.13, Math.sin(a) * s * 0.13, s * 0.03, 0, 7);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawStem(f, grow, sway){
+  if(grow <= 0) return;
+
+  ctx.strokeStyle = '#3f8f5a';
+  ctx.lineWidth = Math.max(2, flowers.u * 0.08);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+
+  const steps = 24;
+  for(let i = 0; i <= steps * grow; i++){
+    const [x, y] = stemPoint(f, i / steps, sway);
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke();
+
+  if(f.leaf && grow > 0.55){
+    const [x, y] = stemPoint(f, 0.5, sway);
+    const side = f.tx > f.bx ? -1 : 1;
+    const ls = flowers.u * 0.55 * ease((grow - 0.55) / 0.45);
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(side * 0.9);
+    ctx.fillStyle = '#4fae6e';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(ls * 0.5, -ls * 0.5, ls, 0);
+    ctx.quadraticCurveTo(ls * 0.5, ls * 0.4, 0, 0);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawWrap(t){
+  const u = flowers.u;
+  const b = flowers.base;
+  const a = ease(t);
+  const top = b.y - u * 0.7;
+  const bot = b.y + u * 2.8;
+  const wTop = u * 2.6 * a;
+  const wBot = u * 0.45;
+
+  ctx.fillStyle = '#e8d9c1';
+  ctx.beginPath();
+  ctx.moveTo(b.x - wTop, top);
+  ctx.lineTo(b.x + wTop, top);
+  ctx.lineTo(b.x + wBot, bot);
+  ctx.lineTo(b.x - wBot, bot);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#d4c0a0';
+  ctx.beginPath();
+  ctx.moveTo(b.x, top);
+  ctx.lineTo(b.x + wTop, top);
+  ctx.lineTo(b.x + wBot, bot);
+  ctx.lineTo(b.x, bot);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#f4e9d6';
+  ctx.beginPath();
+  ctx.moveTo(b.x - wTop, top);
+  ctx.lineTo(b.x + wTop, top);
+  ctx.lineTo(b.x + wTop * 0.85, top + u * 0.35);
+  ctx.lineTo(b.x - wTop * 0.85, top + u * 0.35);
+  ctx.closePath();
+  ctx.fill();
+
+  const ry = top + u * 1.5;
+  const rw = wTop - (wTop - wBot) * (1.5 * u / (bot - top));
+  ctx.fillStyle = '#d6335b';
+  ctx.beginPath();
+  ctx.moveTo(b.x - rw, ry);
+  ctx.lineTo(b.x + rw, ry);
+  ctx.lineTo(b.x + rw * 0.97, ry + u * 0.3);
+  ctx.lineTo(b.x - rw * 0.97, ry + u * 0.3);
+  ctx.closePath();
+  ctx.fill();
+
+  const bw = u * 0.9 * a;
+  ctx.beginPath();
+  ctx.moveTo(b.x, ry + u * 0.15);
+  ctx.quadraticCurveTo(b.x - bw, ry - u * 0.7, b.x - bw * 1.1, ry + u * 0.2);
+  ctx.quadraticCurveTo(b.x - bw, ry + u * 0.7, b.x, ry + u * 0.15);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(b.x, ry + u * 0.15);
+  ctx.quadraticCurveTo(b.x + bw, ry - u * 0.7, b.x + bw * 1.1, ry + u * 0.2);
+  ctx.quadraticCurveTo(b.x + bw, ry + u * 0.7, b.x, ry + u * 0.15);
+  ctx.fill();
+
+  ctx.fillStyle = '#a8213f';
+  ctx.beginPath();
+  ctx.arc(b.x, ry + u * 0.15, u * 0.17, 0, 7);
+  ctx.fill();
+}
+
+function frame(now){
+  const time = (now - start) / 1000;
+  const T = reduce ? 99 : time;
+
+  ctx.clearRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.6);
+  g.addColorStop(0, 'rgba(255,140,120,.12)');
+  g.addColorStop(1, 'rgba(8,11,10,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  const sway = reduce ? 0 : Math.sin(time * 0.9) * flowers.u * 0.06 * ease((T - 3) / 2);
+  flowers.forEach(f => drawStem(f, ease((T - f.delay * 0.6) / 1.4), sway));
+  drawWrap(T / 0.8);
+  flowers.forEach(f => drawFlower(f, back((T - f.delay - 1) / 1.2), sway, time));
+
+  if(T > 3.2) document.body.classList.add('on');
+  if(!reduce) requestAnimationFrame(frame);
+}
+
+function replay(){
+  document.body.classList.remove('on');
+  start = performance.now();
+  if(reduce){
+    document.body.classList.add('on');
+    frame(start);
+  }
+}
+
+document.getElementById('replay').addEventListener('click', replay);
+
+const letterDialog = document.getElementById('letterDialog');
+const letterForm = document.getElementById('letterForm');
+const letterPreview = document.getElementById('letterPreview');
+const letterMessageInput = document.getElementById('letterMessageInput');
+
+document.getElementById('writeOpen').addEventListener('click', () => {
+  letterForm.hidden = false;
+  letterPreview.hidden = true;
+  letterDialog.showModal();
+  letterMessageInput.focus();
+});
+
+document.getElementById('cancelLetter').addEventListener('click', () => letterDialog.close());
+document.getElementById('closeLetter').addEventListener('click', () => letterDialog.close());
+
+document.getElementById('editLetter').addEventListener('click', () => {
+  letterPreview.hidden = true;
+  letterForm.hidden = false;
+  letterMessageInput.focus();
+});
+
+letterForm.addEventListener('submit', event => {
+  event.preventDefault();
+  if(!letterForm.reportValidity()) return;
+
+  const title = document.getElementById('greetingTitleInput').value.trim();
+  const subtitle = document.getElementById('greetingSubtitleInput').value.trim();
+
+  document.getElementById('greetingTitle').textContent = title || 'С днём рождения!';
+  document.getElementById('greetingSubtitle').textContent =
+    subtitle || 'нажмите, чтобы показать ещё раз';
+
+  document.getElementById('letterTo').textContent =
+    document.getElementById('letterToInput').value.trim();
+  document.getElementById('letterText').textContent = letterMessageInput.value.trim();
+
+  letterForm.hidden = true;
+  letterPreview.hidden = false;
+  document.getElementById('letterTitle').textContent = 'Тёплые слова';
+});
+
+addEventListener('resize', () => {
+  build();
+  replay();
+});
+
+build();
+start = performance.now();
+
+if(reduce){
+  document.body.classList.add('on');
+  frame(start);
+}else{
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
